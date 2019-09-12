@@ -177,7 +177,9 @@ class GameViewController: UIViewController {
         timer.invalidate()
         title = song.singer ?? " "
         let alertController = UIAlertController(title: "Время вышло", message: nil, preferredStyle: .alert)
-        let alertActionCancel = UIAlertAction(title: "ОК", style: .default)
+        let alertActionCancel = UIAlertAction(title: "OK", style: .cancel) { (action: UIAlertAction) in
+            self.sendCharacters(text: "showCharacters")
+        }
         alertController.addAction(alertActionCancel)
         self.present(alertController, animated: true, completion: nil)
     }
