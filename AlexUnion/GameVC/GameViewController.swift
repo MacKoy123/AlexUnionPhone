@@ -30,6 +30,7 @@ class GameViewController: UIViewController {
     var isAnswered: Bool = false
     
     var mcSession: MCSession
+    var timer = Timer()
     
     var textSongCharacters: Set<Character> {
         return Set(song.text.uppercased())
@@ -93,6 +94,8 @@ class GameViewController: UIViewController {
     }
     
     @objc func answer(sender: UIBarButtonItem) {
+        timer.invalidate()
+        title = song.singer ?? " "
         buttonTouchedCharacters = Array(Set(song.text.uppercased()))
         isAnswered = true
         sendCharacters(text: "getAnswerPlease")
@@ -111,10 +114,18 @@ class GameViewController: UIViewController {
             switch buttonTouchedCount {
             case 1: numberCharacterSetValue(label: oneCharacter, letter: letter)
             case 2: numberCharacterSetValue(label: twoCharacter, letter: letter)
-            case 3: numberCharacterSetValue(label: threeCharacter, letter: letter)
+            case 3:
+                numberCharacterSetValue(label: threeCharacter, letter: letter)
+                timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerUpdate1Min), userInfo: NSDate(), repeats: true)
             case 4: numberCharacterSetValue(label: fourCharacter, letter: letter)
+                timer.invalidate()
+                title = song.singer ?? " "
             case 5: numberCharacterSetValue(label: fiveCharacter, letter: letter)
+                timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerUpdate30Sec), userInfo: NSDate(), repeats: true)
             case 6: numberCharacterSetValue(label: sixCharacter, letter: letter)
+                timer.invalidate()
+                title = song.singer ?? " "
+                timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerUpdate30Sec), userInfo: NSDate(), repeats: true)
             default: break
             }
             if textSongCharacters.contains(Character(letter)) {
@@ -140,6 +151,35 @@ class GameViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    @objc func timerUpdate1Min() {
+        let elapsed = -(self.timer.userInfo as! NSDate).timeIntervalSinceNow
+        if elapsed < 60 {
+            title = String(format: "%.0f", elapsed)
+        }
+        if elapsed > 60 {
+            timeIsEnded()
+        }
+    }
+    
+    @objc func timerUpdate30Sec() {
+        let elapsed = -(self.timer.userInfo as! NSDate).timeIntervalSinceNow
+        if elapsed < 30 {
+            title = String(format: "%.0f", elapsed)
+        }
+        if elapsed > 30 {
+            timeIsEnded()
+        }
+    }
+    
+    func timeIsEnded() {
+        timer.invalidate()
+        title = song.singer ?? " "
+        let alertController = UIAlertController(title: "Время вышло", message: nil, preferredStyle: .alert)
+        let alertActionCancel = UIAlertAction(title: "ОК", style: .default)
+        alertController.addAction(alertActionCancel)
+        self.present(alertController, animated: true, completion: nil)
     }
 }
 
